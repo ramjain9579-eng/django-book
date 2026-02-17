@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie.name }} | Select Theater</title>
+
+    <style>
+        /* Base Reset & Typography */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        /* Header Styling */
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #222;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Theater Grid Layout */
+        .theater-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        /* Card Component */
+        .theater-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* JS Triggered Highlight Class */
+        .theater-card.highlight {
+            border-color: #e50914;
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.15);
+            transform: translateY(-8px);
+        }
+
+        .theater-card h2 {
+            margin: 0 0 10px 0;
+            color: #1a1a1a;
+            font-size: 1.4rem;
+        }
+
+        .theater-card p {
+            color: #606770;
+            margin-bottom: 20px;
+        }
+
+        /* Button Styling */
+        .book-btn {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background-color: #e50914;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .book-btn:hover {
+            background-color: #c40812;
+        }
+
+        .no-theater {
+            text-align: center;
+            color: #888;
+            font-size: 1.2rem;
+            padding: 50px;
+            background: #fff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>🎬 {{ movie.name|default:"Movie Title" }}</h1>
+            <p class="subtitle">
+                3h 19m • Action, Drama, War • UA13+ • 18 DEC, 2026<br>
+                <strong>Select a theater to book seats</strong>
+            </p>
+        </div>
+
+        {% if theaters %}
+            <div class="theater-list">
+                {% for theater in theaters %}
+                    <div class="theater-card" id="theater-{{ theater.id }}">
+                        <div>
+                            <h2>{{ theater.name }}</h2>
+                            <p>📍 {{ theater.location }}</p>
+                        </div>
+
+                        <a href="{% url 'book_seats' theater.id %}" 
+                           class="book-btn" 
+                           onclick="confirmBooking(event, '{{ theater.name|escapejs }}')">
+                            Book Seats
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-theater">
+                <p>🚫 No theaters currently showing this movie in your area.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        /**
+         * Confirmation dialog before navigation
+         * @param {Event} event - The click event
+         * @param {string} theaterName - Name of the theater
+         */
+        function confirmBooking(event, theaterName) {
+            const confirmAction = confirm(
+                "Do you want to book seats at " + theaterName + "?"
+            );
+
+            if (!confirmAction) {
+                // Stop the link from following the href if user cancels
+                event.preventDefault();
+            }
+        }
+
+        /**
+         * Visual feedback: Highlighting cards
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            const cards = document.querySelectorAll(".theater-card");
+
+            cards.forEach(card => {
+                card.addEventListener("mouseenter", () => {
+                    card.classList.add("highlight");
+                });
+
+                card.addEventListener("mouseleave", () => {
+                    card.classList.remove("highlight");
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+{% extends "users/basic.html" %}
+
+{% block content %}
+
+<style>
+    .seat-container {
+        max-width: 700px;
+        margin: auto;
+        padding: 20px;
+        background: #111827;
+        color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .seat-title {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .screen {
+        background: #e5e7eb;
+        color: #111;
+        text-align: center;
+        padding: 8px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .seats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 12px;
+        justify-items: center;
+    }
+
+    .seat input {
+        display: none;
+    }
+
+    .seat label {
+        display: block;
+        padding: 10px 0;
+        width: 60px;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+
+    /* AVAILABLE */
+    .seat.available label {
+        background: #16a34a;
+        color: #fff;
+    }
+
+    .seat.available label:hover {
+        background: #22c55e;
+        transform: scale(1.05);
+    }
+
+    /* SELECTED */
+    .seat input:checked + label {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    /* RESERVED */
+    .seat.reserved label {
+        background: #f59e0b;
+        color: #111;
+        cursor: not-allowed;
+    }
+
+    /* BOOKED */
+    .seat.booked label {
+        background: #374151;
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+        font-size: 14px;
+    }
+
+    .box {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .available { background: #16a34a; }
+    .selected { background: #2563eb; }
+    .reserved { background: #f59e0b; }
+    .booked { background: #374151; }
+
+    .submit-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: #e50914;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        background: #b91c1c;
+    }
+</style>
+
+<div class="seat-container">
+    <div class="seat-title">
+        <h2>{{ theater.movie.name }}</h2>
+        <p>{{ theater.name }}</p>
+    </div>
+
+    <div class="screen">
+        🎬 SCREEN THIS WAY
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="seats-grid">
+            {% for seat in seats %}
+                <div class="seat {{ seat.status }}">
+
+                    {% if seat.status == "available" %}
+                        <input
+                            type="checkbox"
+                            name="seats"
+                            id="seat{{ seat.id }}"
+                            value="{{ seat.id }}"
+                        >
+                        <label for="seat{{ seat.id }}">
+                            {{ seat.seat_number }}
+                        </label>
+                    {% else %}
+                        <input type="checkbox" disabled>
+                        <label>
+                            {{ seat.seat_number }}
+                        </label>
+                    {% endif %}
+
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="legend">
+            <span><i class="box available"></i> Available</span>
+            <span><i class="box selected"></i> Selected</span>
+            <span><i class="box reserved"></i> Reserved</span>
+            <span><i class="box booked"></i> Booked</span>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            🎟️ Book Selected Seats
+        </button>
+    </form>
+</div>
+
+{% endblock %}
